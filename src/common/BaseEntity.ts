@@ -9,15 +9,17 @@ export class BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   public id: string
 
+  @ApiProperty({required: false})
   @CreateDateColumn({select: false})
-  public addTime?: number
+  public addTime: number
 
+  @ApiProperty({required: false})
   @UpdateDateColumn({select: false})
-  public updateTime?: number
+  public updateTime: number
 
-  constructor(id?: string) {
-    if (id) {
-      this.id = id
-    }
-  }
+  // constructor(id?: string) {
+  //   if (id) {
+  //     this.id = id
+  //   }
+  // }
 }

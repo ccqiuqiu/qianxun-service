@@ -1,26 +1,46 @@
-import {Controller, Post, UseGuards, Body, Query, Get} from '@nestjs/common'
+import {
+  Controller,
+  Post,
+  UseGuards,
+  Body,
+  Query,
+  Get,
+  CacheKey,
+  CacheTTL,
+} from '@nestjs/common'
 import {ApiBearerAuth, ApiResponse, ApiTags} from '@nestjs/swagger'
 import {AuthGuard} from '@nestjs/passport'
 import {UserService} from './user.service'
-import {UserDto} from '../../dto/user.dto'
+import {UserSelectDto} from '../../dto/UserSelect.dto'
+import {UserSaveDto} from '../../dto/UserSave.dto'
+import {RedisService} from '../redis/redis.service'
 
 @ApiTags('user')
 @ApiBearerAuth()
 @UseGuards(AuthGuard('jwt'))
 @Controller('user')
 export class UserController {
-  constructor(protected readonly userService: UserService) {
+  constructor(
+    protected readonly userService: UserService,
+    private readonly redisService: RedisService,
+  ) {
   }
 
-  @ApiResponse({type: UserDto})
+  @ApiResponse({type: UserSelectDto})
+  @CacheKey('custom_key')
+  @CacheTTL(5)
   @Post('all')
-  all() {
-    return this.userService.find()
+  async all() {
+    const users = await this.userService.find()
+    this.redisService.set('users', '123', 100)
+    return users.map(user => UserSelectDto.fromEntity(user))
   }
 
   @Post('save')
-  save(@Body() user: UserDto) {
-    return this.userService.save(user)
+  async save(@Body() user: UserSaveDto) {
+    const savedUser = await this.userService.save(user)
+    delete savedUser.password
+    return savedUser
   }
 
   @Get('delete')

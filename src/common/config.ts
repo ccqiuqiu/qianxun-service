@@ -17,4 +17,11 @@ export default () => ({
     secret: 'secretKey',
     expiresIn: '20m',
   },
+  redis: {
+    host: 'localhost',
+    port: 6379,
+  },
+  cache: {
+    ttl: 10, // 单位秒
+  }
 })

@@ -4,5 +4,5 @@
 import {OmitType} from '@nestjs/swagger'
 import {User} from '../entity/user.entity'
 
-export class UserDto extends OmitType(User, ['addTime', 'updateTime']) {
+export class UserSaveDto extends OmitType(User, ['id', 'addTime', 'updateTime']) {
 }

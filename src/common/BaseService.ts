@@ -18,12 +18,14 @@ export class BaseService<Model> {
     return this.repository.find(options)
   }
 
-  save(model: Model) {
+  save(model: any) {
     return this.repository.save(model)
   }
 
-  delete(id: string) {
-    return this.repository.delete(id)
+  async delete(id: string) {
+    const re = await this.repository.delete(id)
+    console.log(re)
+    return id
   }
 
 }

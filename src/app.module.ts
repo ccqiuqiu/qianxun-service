@@ -1,7 +1,7 @@
 /**
  * Created by 熊超超 on 2020/6/10.
  */
-import {Module} from '@nestjs/common'
+import {Module, CacheModule, CacheInterceptor} from '@nestjs/common'
 import {ConfigModule} from '@nestjs/config'
 import config from './common/config'
 import {AppController} from './app.controller'
@@ -12,6 +12,9 @@ import {LoggerModule} from './modules/logger/logger.module'
 import {TypeOrmModule} from '@nestjs/typeorm'
 import {ConfigService} from '@nestjs/config'
 import {DbCustomLogger} from './modules/logger/logger.service'
+import * as redisStore from 'cache-manager-redis-store'
+import {APP_INTERCEPTOR} from '@nestjs/core'
+import {RedisModule} from './modules/redis/redis.module'
 
 @Module({
   imports: [
@@ -33,11 +36,29 @@ import {DbCustomLogger} from './modules/logger/logger.service'
         },
       }
     ),
+    CacheModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => {
+        const redis = configService.get('redis')
+        const cache = configService.get('cache')
+        return {
+          store: redisStore,
+          host: redis.host,
+          port: redis.port,
+          ttl: cache.ttl,
+        }
+      },
+      inject: [ConfigService],
+    }),
     AuthModule,
     UserModule,
+    RedisModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {provide: APP_INTERCEPTOR, useClass: CacheInterceptor},
+  ],
 })
 export class AppModule {
 }
