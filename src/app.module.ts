@@ -31,7 +31,7 @@ import {RedisModule} from './modules/redis/redis.module'
         useFactory: async (configService: ConfigService) => {
           return {
             ...configService.get('db'),
-            logger: new DbCustomLogger()
+            logger: new DbCustomLogger(),
           }
         },
       }
